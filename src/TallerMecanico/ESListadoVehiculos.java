@@ -22,7 +22,12 @@ public class ESListadoVehiculos {
     //Construir las lineas y añadirlas a la lista
     for (int i = 0; i < listado.tamanyoListado(); i++) {
       Vehiculo actual=listado.getVehiculo(i);
-      lineas.add(actual.getMatricula()+","+actual.getPropietario());
+      String lineaVehiculo="";
+      lineaVehiculo+=actual.getMatricula()+","+actual.getPropietario();
+      for (Reparacion r: actual.getReparaciones()) {
+        lineaVehiculo+=","+r.getDescripcion()+","+r.getFecha()+","+r.getPrecio();
+      }
+      lineas.add(lineaVehiculo);
     }
     try {
       Files.write(Paths.get(fichero),lineas);
@@ -41,8 +46,19 @@ public class ESListadoVehiculos {
     ListadoVehiculos nuevo=new ListadoVehiculos();
     for (String s:lineas) {
       String[] partes=s.split(",");
-      nuevo.anyadirVehiculo(new Vehiculo(partes[0],partes[1]));
+      Vehiculo aGuardar=new Vehiculo(partes[0],partes[1]);
+      nuevo.anyadirVehiculo(aGuardar);
+      int indice=2;
+      while(indice<partes.length){
+        Reparacion nueva=new Reparacion(
+                partes[indice],
+                Integer.parseInt(partes[indice+2]),
+                partes[indice+1]);
+        aGuardar.anyadeReparacion(nueva);
+        indice+=3;
+      }
     }
+
     return nuevo;
   }
 }

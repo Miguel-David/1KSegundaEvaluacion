@@ -1,6 +1,7 @@
 package TallerMecanico;
 
 import javax.swing.*;
+import java.util.List;
 
 public class Aplicacion {
   public static void main(String[] args) {
@@ -16,7 +17,7 @@ public class Aplicacion {
           if(!misVehiculos.anyadirVehiculo(nuevoVehiculo)){
             JOptionPane.showMessageDialog(null,"La matrícula ya está");
           } else {
-            ESListadoVehiculos.escribeListadoFichero(misVehiculos,"taller.csv");
+            //ESListadoVehiculos.escribeListadoFichero(misVehiculos,"taller.csv");
           }
           System.out.println(misVehiculos);
 
@@ -25,18 +26,11 @@ public class Aplicacion {
           System.out.println("Eliminar Vehículo");
           //Pedir matrícula
           //Mostrar desplegable con matrículas disponibles
-          String[] matriculas=misVehiculos.obtenerMatriculas();
-          String elegido=(String) JOptionPane.showInputDialog(null,
-                  "Elija Vehículo a borrar",
-                  "BORRADO DE VEHÍCULOS",
-                  JOptionPane.WARNING_MESSAGE,
-                  null,
-                  matriculas,
-                  matriculas[0]);
+          String elegido = matriculaDropBox(misVehiculos, "Elija Vehículo a borrar", "BORRADO DE VEHÍCULOS");
           //Borrar vehiculo de misVehículos
           if(elegido!=null) {
             misVehiculos.borrarPorMatricula(elegido);
-            ESListadoVehiculos.escribeListadoFichero(misVehiculos,"taller.csv");
+            //ESListadoVehiculos.escribeListadoFichero(misVehiculos,"taller.csv");
           }
 
           break;
@@ -46,16 +40,86 @@ public class Aplicacion {
           break;
         case 3:
           System.out.println("Nueva Reparacion");
+          //Pedir matrícula
+          //Mostrar desplegable con matrículas disponibles
+          String elegidoReparacion = matriculaDropBox(misVehiculos, "Elija Vehículo para la Reparación", "REPARACION DE VEHÍCULOS");
+          //Borrar vehiculo de misVehículos
+          if(elegidoReparacion!=null) {
+            Vehiculo vehiculoAReparar=misVehiculos.buscarMatricula(elegidoReparacion);
+            Reparacion nuevaReparacion=ESReparacion.pedirReparacion(vehiculoAReparar);
+            if(nuevaReparacion!=null){
+              vehiculoAReparar.anyadeReparacion(nuevaReparacion);
+            }
+          }
+
           break;
         case 4:
           System.out.println("Buscar Reparación");
+          String elegidoBuscar = matriculaDropBoxConTodos(misVehiculos, "Elija Vehículo a buscar Reparacion", "BUSQUEDA DE REPARACIÓN");
+          if(elegidoBuscar==null){
+            break;
+          }
+          Vehiculo buscado= misVehiculos.buscarMatricula(elegidoBuscar);
+
+          String palabraBuscar=JOptionPane.showInputDialog("Palabra a buscar");
+          if(palabraBuscar==null){
+            break;
+          }
+          if(buscado!=null) {
+            List<Reparacion> reparacionesPalabraClave = null;
+            if (palabraBuscar.equals("")) {
+              reparacionesPalabraClave = buscado.getReparaciones();
+            } else {
+              reparacionesPalabraClave = buscado.getReparacionesConClave(palabraBuscar);
+            }
+            String listaReparaciones = "El vehículo " + buscado.getMatricula();
+            listaReparaciones += " tiene " + reparacionesPalabraClave.size();
+            listaReparaciones += " reparaciones con " + palabraBuscar;
+            for (Reparacion r : reparacionesPalabraClave) {
+              listaReparaciones += "\n" + r.info();
+            }
+            JOptionPane.showMessageDialog(null, listaReparaciones);
+
+          } else {
+            //JOptionPane.showMessageDialog(null,"Buscar en todos");
+            //Para después del fin de semana
+          }
           break;
         case -1:
         case 5:
+          ESListadoVehiculos.escribeListadoFichero(misVehiculos,"taller.csv");
           continuarEnElPrograma=false;
           break;
         default:break;
       }
     } while(continuarEnElPrograma);
+  }
+
+  private static String matriculaDropBoxConTodos(ListadoVehiculos misVehiculos, String s, String s2) {
+    String[] matriculas = misVehiculos.obtenerMatriculas();
+    String[] matriculasTodos= new String[matriculas.length+1];
+    matriculasTodos[0]="Todos";
+    for (int i = 0; i < matriculas.length; i++) {
+      matriculasTodos[i+1]=matriculas[i];
+    }
+    return (String) JOptionPane.showInputDialog(null,
+            s,
+            s2,
+            JOptionPane.WARNING_MESSAGE,
+            null,
+            matriculasTodos,
+            matriculasTodos[0]);
+  }
+
+
+  private static String matriculaDropBox(ListadoVehiculos misVehiculos, String s, String s2) {
+    String[] matriculas = misVehiculos.obtenerMatriculas();
+    return (String) JOptionPane.showInputDialog(null,
+            s,
+            s2,
+            JOptionPane.WARNING_MESSAGE,
+            null,
+            matriculas,
+            matriculas[0]);
   }
 }

@@ -59,12 +59,17 @@ public class ListadoVehiculos {
   }
 
   public void borrarPorMatricula(String elegido) {
-    Vehiculo aBorrar=null;
+    Vehiculo aBorrar=buscarMatricula(elegido);
+    if(aBorrar!=null) {
+      listado.remove(aBorrar);
+    }
+  }
+  public Vehiculo buscarMatricula(String matricula){
     for (Vehiculo v:listado) {
-      if(v.getMatricula().equals(elegido)){
-        aBorrar=v;
+      if(v.getMatricula().equals(matricula)){
+        return v;
       }
     }
-    listado.remove(aBorrar);
+    return null;
   }
 }
